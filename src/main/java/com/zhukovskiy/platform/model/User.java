@@ -1,32 +1,44 @@
 package com.zhukovskiy.platform.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.time.LocalDate;
+
+@Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    // В будущем здесь будет @Id для базы данных
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
+@Table(name = "users")
+public class User implements BaseEntity<Long>{
 
-    //@Column(unique = true, nullable = false)
-    private String username; // Обычно это email
-    //@Column(nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String country;
+
+    @Column(nullable = false)
     private String password;
 
-    //private String firstName;
-    //private String lastName;
-    //private String country;
-    //private Date dob;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Role role = Role.CUSTOMER;
+
+    @Column(nullable = false)
+    private LocalDate dob;
 }
 
-//TODO лучше сделать дополнительно класс в пакете security CustomUserDetails implements UserDetails
-//TODO и вызывать в UserDetailsService из него методы
-//TODO решить проблему с PasswordEncoder, тк он может быть разным в CustomUserDetailsService и WebsecurityConfig
-
+//TODO добавить маппинг на страницу админа, разобраться с home page/greeting page

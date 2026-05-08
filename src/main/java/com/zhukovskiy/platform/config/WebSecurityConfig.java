@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
@@ -27,6 +28,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/register", "/login").permitAll()
                         .requestMatchers("/greet").authenticated()
+                        //.requestMatchers("/admin").hasRole("ADMIN") // Restrict /admin to users without ADMIN role
                         .anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -36,7 +38,8 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    @Bean
+    //todo возможно так не правильно
+    /*@Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception{
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
@@ -44,10 +47,10 @@ public class WebSecurityConfig {
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder.build();
-    }
+    }*/
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

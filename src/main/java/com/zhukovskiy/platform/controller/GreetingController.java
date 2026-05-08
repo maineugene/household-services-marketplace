@@ -1,8 +1,12 @@
 package com.zhukovskiy.platform.controller;
 
 import com.zhukovskiy.platform.dto.RegistrationForm;
+import com.zhukovskiy.platform.model.User;
+import com.zhukovskiy.platform.repository.UserRepository;
+import com.zhukovskiy.platform.service.CustomUserDetails;
 import com.zhukovskiy.platform.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,15 +19,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
+@AllArgsConstructor
 public class GreetingController {
 
     private final CustomUserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
-
-    public GreetingController(CustomUserDetailsService userDetailsService, AuthenticationManager authenticationManager) {
-        this.userDetailsService = userDetailsService;
-        this.authenticationManager = authenticationManager;
-    }
+    private final UserRepository userRepository;
 
     @GetMapping("/")
     public String home(){
@@ -34,13 +35,18 @@ public class GreetingController {
     public String greet(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String username = authentication.getName();
-        System.out.println("Username from context " + username);
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
 
-        // Add the username to the model
-        model.addAttribute("username", username);
-        //TODO также добавлять все другие атрибуты кроме пароля
-        // Return the Thymeleaf template name
+        model.addAttribute("user", user);
+        /*model.addAttribute("email", user.getEmail());
+        model.addAttribute("firstName", user.getFirstName());
+        model.addAttribute("lastName", user.getLastName());
+        model.addAttribute("dob", user.getDob());
+        model.addAttribute("")*/
+        String email = authentication.getName();
+        System.out.println("Email from context " + email);
+
         return "greet";
     }
 
@@ -58,7 +64,8 @@ public class GreetingController {
     @PostMapping("/register")
     public String registerUser(
             @Valid @ModelAttribute("registrationForm") RegistrationForm form,
-            BindingResult result
+            BindingResult result,
+            Model model
             //@RequestParam String username,
             //@RequestParam String password
     ) {
@@ -66,19 +73,23 @@ public class GreetingController {
             return "register";
         }
         try {
-            userDetailsService.registerUser(form.getEmail(), form.getPassword());
+            userDetailsService.registerUser(form);
         } catch (Exception userExistsAlready) {
             // Redirect to the /register endpoint
+            result.rejectValue("email", "error.registrationForm", "User with this email already exists");
             return "redirect:/register?error";
         }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(form.getEmail(), form.getPassword())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(form.getEmail(), form.getPassword())
+            );
 
-        // Set the authentication in the SecurityContext
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            // Set the authentication in the SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e){
+            return "redirect:/login";
+        }
         // Redirect to the /login endpoint
         //return "redirect:/login?success";
         return "redirect:/greet"; // сразу на greet
