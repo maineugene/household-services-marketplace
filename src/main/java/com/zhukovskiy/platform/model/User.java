@@ -39,6 +39,19 @@ public class User implements BaseEntity<Long>{
 
     @Column(nullable = false)
     private LocalDate dob;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private SpecialistProfile specialistProfile;
+
+    @Transient
+    public boolean isSpecialist() {
+        return role == Role.SPECIALIST;
+    }
+
+    @Transient
+    public boolean hasSpecialistProfile() {
+        return specialistProfile != null;
+    }
 }
 
 //TODO добавить маппинг на страницу админа, разобраться с home page/greeting page

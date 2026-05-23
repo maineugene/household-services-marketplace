@@ -3,7 +3,6 @@ package com.zhukovskiy.platform.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,33 +11,39 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "orders")
-public class Order implements BaseEntity<Long> {
+@Table(name = "reviews")
+public class Review implements BaseEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "specialist_id")
+    @JoinColumn(name = "specialist_id", nullable = false)
     private User specialist;
 
-    @Column(nullable = false, length = 2000)
-    private String description;
+    private Integer rating; // 1-5
 
-    private String address;
+    @Column(length = 1000)
+    private String comment;
 
-    private BigDecimal budget;
-
-    private LocalDateTime deadline;
+    @ManyToOne
+    @JoinColumn(name = "parent_review_id")
+    private Review parentReview; // для ответов специалиста
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private OrderStatus status = OrderStatus.ACTIVE;
+    private ReviewStatus status = ReviewStatus.PENDING;
+
+    private String moderationReason;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
