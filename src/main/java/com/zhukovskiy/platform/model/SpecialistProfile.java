@@ -27,6 +27,7 @@ public class SpecialistProfile implements BaseEntity<Long> {
     @Column(length = 1000)
     private String description;
 
+    @Column(name = "experience_years")
     private Integer experienceYears;
 
     private String education;
@@ -35,6 +36,7 @@ public class SpecialistProfile implements BaseEntity<Long> {
     @CollectionTable(name = "specialist_categories",
             joinColumns = @JoinColumn(name = "specialist_id"))
     @Column(name = "category")
+    @Builder.Default
     private List<String> categories = new ArrayList<>();
 
     @Column(name = "hourly_rate")
@@ -43,7 +45,8 @@ public class SpecialistProfile implements BaseEntity<Long> {
     @Column(name = "fixed_price")
     private BigDecimal fixedPrice;
 
-    private String serviceArea; // география обслуживания
+    @Column(name = "service_area")
+    private String serviceArea;
 
     @Column(name = "is_verified")
     @Builder.Default
@@ -54,13 +57,26 @@ public class SpecialistProfile implements BaseEntity<Long> {
     @Builder.Default
     private ModerationStatus moderationStatus = ModerationStatus.PENDING;
 
-    @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "specialistProfile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<PortfolioItem> portfolio = new ArrayList<>();
 
     @Column(name = "average_rating")
     @Builder.Default
     private Double averageRating = 0.0;
 
-    @OneToMany(mappedBy = "specialist")
+    @OneToMany(mappedBy = "specialistProfile", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Review> reviews = new ArrayList<>();
+
+    // Вспомогательные методы для управления портфолио
+    public void addPortfolioItem(PortfolioItem item) {
+        portfolio.add(item);
+        item.setSpecialistProfile(this);
+    }
+
+    public void removePortfolioItem(PortfolioItem item) {
+        portfolio.remove(item);
+        item.setSpecialistProfile(null);
+    }
 }

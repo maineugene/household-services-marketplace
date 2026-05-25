@@ -3,6 +3,8 @@ package com.zhukovskiy.platform.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -17,8 +19,8 @@ public class PortfolioItem implements BaseEntity<Long> {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "specialist_id", nullable = false)
-    private SpecialistProfile specialist;
+    @JoinColumn(name = "specialist_profile_id", nullable = false)
+    private SpecialistProfile specialistProfile;  // Это поле должно быть
 
     private String title;
 
@@ -28,5 +30,5 @@ public class PortfolioItem implements BaseEntity<Long> {
     private String imageUrl;
 
     @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 }

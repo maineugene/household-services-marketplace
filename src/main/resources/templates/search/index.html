@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск специалистов</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-form {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .search-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 2;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .category-select {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .location-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .search-button {
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .search-button:hover {
+            background: #218838;
+        }
+        .popular-categories {
+            margin-top: 30px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .category-card {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: transform 0.2s;
+        }
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #28a745;
+        }
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .category-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div class="search-container">
+    <h1>Поиск специалистов</h1>
+
+    <form th:action="@{/search/specialists}" method="get" class="search-form">
+        <div class="search-row">
+            <input type="text"
+                   name="query"
+                   class="search-input"
+                   placeholder="Что нужно сделать? (например: починить кран, сделать ремонт...)"
+                   th:value="${param.query}">
+        </div>
+
+        <div class="search-row">
+            <select name="category" class="category-select">
+                <option value="">Все категории</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat}"
+                        th:text="${cat}"
+                        th:selected="${param.category == cat}">
+                </option>
+            </select>
+
+            <input type="text"
+                   name="location"
+                   class="location-input"
+                   placeholder="Город или район"
+                   th:value="${param.location}">
+
+            <button type="submit" class="search-button">Найти</button>
+        </div>
+    </form>
+
+    <div class="popular-categories">
+        <h2>Популярные категории</h2>
+        <div class="category-grid">
+            <a th:each="cat : ${categories}"
+               th:href="@{/search/specialists(category=${cat})}"
+               class="category-card">
+                <div class="category-icon">🔧</div>
+                <div class="category-name" th:text="${cat}">Категория</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

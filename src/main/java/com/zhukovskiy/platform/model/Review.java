@@ -30,6 +30,10 @@ public class Review implements BaseEntity<Long> {
     @JoinColumn(name = "specialist_id", nullable = false)
     private User specialist;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialist_profile_id")
+    private SpecialistProfile specialistProfile; // Добавляем ссылку на профиль специалиста
+
     private Integer rating; // 1-5
 
     @Column(length = 1000)
@@ -37,7 +41,7 @@ public class Review implements BaseEntity<Long> {
 
     @ManyToOne
     @JoinColumn(name = "parent_review_id")
-    private Review parentReview; // для ответов специалиста
+    private Review parentReview;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

@@ -7,6 +7,7 @@ import com.zhukovskiy.platform.model.SpecialistProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public interface SpecialistMapper {
     SpecialistProfile toEntity(SpecialistProfileDto dto);
 
     PortfolioItemDto portfolioToDto(PortfolioItem item);
+
     PortfolioItem portfolioToEntity(PortfolioItemDto dto);
+
     List<PortfolioItemDto> portfolioListToDtoList(List<PortfolioItem> items);
 }
