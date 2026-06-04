@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body>
 <header th:fragment="header">
     <nav style="background: #333; color: white; padding: 15px;">
         <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; gap: 20px;">
                 <a href="/" style="color: white; text-decoration: none;">Главная</a>
                 <a href="/search" style="color: white; text-decoration: none;">Найти специалиста</a>
-                <a href="/search/specialists" style="color: white; text-decoration: none;">Все специалисты</a>
+                <a href="/orders/create" style="color: white; text-decoration: none;">Создать заказ</a>
                 <a href="/orders/my" style="color: white; text-decoration: none;">Мои заказы</a>
+                <a href="/orders/available" style="color: white; text-decoration: none;">Доступные заказы</a>
+                <a href="/bids/my" style="color: white; text-decoration: none;">Мои заявки</a>
             </div>
             <div>
                 <a href="/specialist/profile/view" style="color: white; text-decoration: none;">Профиль</a>
@@ -22,5 +18,3 @@
         </div>
     </nav>
 </header>
-</body>
-</html>

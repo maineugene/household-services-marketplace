@@ -13,26 +13,26 @@
     <aside>
         <nav>
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Сервисы</a></li>
+                <li><a href="#">Контакты</a></li>
             </ul>
         </nav>
     </aside>
 
     <!-- Main Content -->
     <main>
-        <h1>Welcome to our website</h1>
-        <p>Some interesting text. Below should be a link for Login:</p>
+        <h1>Добро пожаловать на платформу подбора специалистов</h1>
+        <p>Для получения полного доступа к услугам необходима авторизация, ниже ссылка на форму входа</p>
         <p th:text="${message}">Let's get started</p>
-        <a th:href="@{/login}">Go to Login Page</a>
+        <a th:href="@{/login}">Login Page</a>
     </main>
 </div>
 
 <!-- Footer -->
 <footer>
-    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Roga i Kopita. All rights reserved.</p>
+    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Платформа подбора специалистов. Все права защищены.</p>
 </footer>
 </body>
 </html>

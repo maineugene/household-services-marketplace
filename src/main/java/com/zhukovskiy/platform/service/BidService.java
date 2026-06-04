@@ -7,6 +7,7 @@ import com.zhukovskiy.platform.model.OrderStatus;
 import com.zhukovskiy.platform.model.User;
 import com.zhukovskiy.platform.repository.BidRepository;
 import com.zhukovskiy.platform.repository.OrderRepository;
+import com.zhukovskiy.platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class BidService {
     private final BidRepository bidRepository;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     /**
      * Подача заявки на заказ
@@ -100,5 +102,20 @@ public class BidService {
 
         // Уведомляем выбранного специалиста
         notificationService.notifySpecialistSelected(order);
+    }
+
+    /**
+     * Проверка, подавал ли специалист заявку на заказ
+     */
+    public boolean hasBid(Order order, User specialist) {
+        return bidRepository.existsByOrderAndSpecialist(order, specialist);
+    }
+
+    /**
+     * Получение заявки по ID
+     */
+    public Bid getBidById(Long id) {
+        return bidRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
     }
 }
