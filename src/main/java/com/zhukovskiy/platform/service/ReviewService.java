@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,12 +31,12 @@ public class ReviewService {
     public Review createReview(Order order, User customer, ReviewDto reviewDto) {
         // Проверяем, что заказ выполнен
         if (order.getStatus() != OrderStatus.COMPLETED) {
-            throw new RuntimeException("Отзыв можно оставить только после выполнения заказа");
+            throw new BusinessRuleException("Отзыв можно оставить только после выполнения заказа");
         }
 
         // Проверяем, что отзыв оставляет заказчик
         if (!order.getCustomer().getId().equals(customer.getId())) {
-            throw new RuntimeException("Только заказчик может оставить отзыв");
+            throw new BusinessRuleException("Только заказчик может оставить отзыв");
         }
 
         // Проверяем, что заказчик еще не оставлял отзыв этому специалисту
@@ -41,12 +44,12 @@ public class ReviewService {
                 customer, order.getSpecialist(), ReviewStatus.APPROVED);
 
         if (alreadyReviewed) {
-            throw new RuntimeException("Вы уже оставляли отзыв этому специалисту");
+            throw new BusinessRuleException("Вы уже оставляли отзыв этому специалисту");
         }
 
         // Получаем профиль специалиста
         SpecialistProfile specialistProfile = specialistProfileRepository.findByUser(order.getSpecialist())
-                .orElseThrow(() -> new RuntimeException("Профиль специалиста не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста не найден"));
 
         Review review = Review.builder()
                 .order(order)
@@ -67,7 +70,7 @@ public class ReviewService {
      */
     public Review getReviewById(Long id) {
         return reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
     }
 
     /**
@@ -76,11 +79,11 @@ public class ReviewService {
     @Transactional
     public Review respondToReview(Long parentReviewId, User specialist, String responseComment) {
         Review parentReview = reviewRepository.findById(parentReviewId)
-                .orElseThrow(() -> new RuntimeException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
 
         // Проверяем, что отвечает специалист, которому оставлен отзыв
         if (!parentReview.getSpecialist().getId().equals(specialist.getId())) {
-            throw new RuntimeException("Только специалист может ответить на отзыв о себе");
+            throw new BusinessRuleException("Только специалист может ответить на отзыв о себе");
         }
 
         Review response = Review.builder()
@@ -103,7 +106,7 @@ public class ReviewService {
     @Transactional
     public Review moderateReview(Long reviewId, ReviewStatus status, String reason) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
 
         review.setStatus(status);
         review.setModerationReason(reason);

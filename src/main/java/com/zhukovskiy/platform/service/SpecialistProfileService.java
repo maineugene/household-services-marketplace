@@ -6,6 +6,7 @@ import com.zhukovskiy.platform.model.*;
 import com.zhukovskiy.platform.repository.ReviewRepository;
 import com.zhukovskiy.platform.repository.SpecialistProfileRepository;
 import com.zhukovskiy.platform.repository.UserRepository;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class SpecialistProfileService {
      */
     public SpecialistProfile getProfileByUser(User user) {
         return specialistProfileRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
     }
 
     /**
@@ -74,7 +75,7 @@ public class SpecialistProfileService {
      */
     public SpecialistProfile getProfileById(Long id) {
         return specialistProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
     }
 
     /**
@@ -104,7 +105,7 @@ public class SpecialistProfileService {
     @Transactional
     public void moderateProfile(Long profileId, ModerationStatus status) {
         SpecialistProfile profile = specialistProfileRepository.findById(profileId)
-                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
 
         profile.setModerationStatus(status);
         if (status == ModerationStatus.APPROVED) {

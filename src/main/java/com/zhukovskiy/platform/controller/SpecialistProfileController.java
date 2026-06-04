@@ -8,6 +8,7 @@ import com.zhukovskiy.platform.model.User;
 import com.zhukovskiy.platform.security.SecurityUtils;
 import com.zhukovskiy.platform.service.PortfolioService;
 import com.zhukovskiy.platform.service.SpecialistProfileService;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -41,8 +42,7 @@ public class SpecialistProfileController {
             SpecialistProfileDto profileDto = specialistProfileService.convertToDto(profile);
             model.addAttribute("profile", profileDto);
             model.addAttribute("isEdit", true);
-        } catch (RuntimeException e) {
-            // Профиль не найден, создаем новый
+        } catch (ResourceNotFoundException e) {
             model.addAttribute("profile", new SpecialistProfileDto());
             model.addAttribute("isEdit", false);
         }
@@ -92,7 +92,7 @@ public class SpecialistProfileController {
             model.addAttribute("ratingStats", ratingStats);
 
             return "specialist/profile-view";
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return "redirect:/specialist/profile/edit";
         }
     }
@@ -109,7 +109,7 @@ public class SpecialistProfileController {
             model.addAttribute("reviews", specialistProfileService.getApprovedReviews(profile.getUser()));
 
             return "specialist/public-profile";
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundException e) {
             return "error/404";
         }
     }

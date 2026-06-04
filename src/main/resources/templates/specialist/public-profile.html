@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль специалиста</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div style="max-width: 800px; margin: 20px auto; padding: 20px;">
+    <h1 th:text="${profile.user.firstName} + ' ' + ${profile.user.lastName}"></h1>
+
+    <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+        <p><strong>Описание:</strong> <span th:text="${profile.description}"></span></p>
+        <p><strong>Опыт:</strong> <span th:text="${profile.experienceYears}"></span> лет</p>
+        <p><strong>Образование:</strong> <span th:text="${profile.education}"></span></p>
+        <p><strong>Категории:</strong> <span th:text="${profile.categories}"></span></p>
+        <p><strong>Рейтинг:</strong> ⭐ <span th:text="${profile.averageRating}"></span></p>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

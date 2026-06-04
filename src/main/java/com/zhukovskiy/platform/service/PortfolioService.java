@@ -4,7 +4,10 @@ import com.zhukovskiy.platform.dto.PortfolioItemDto;
 import com.zhukovskiy.platform.model.PortfolioItem;
 import com.zhukovskiy.platform.model.SpecialistProfile;
 import com.zhukovskiy.platform.repository.PortfolioItemRepository;
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PortfolioService {
 
     private final PortfolioItemRepository portfolioItemRepository;
@@ -47,7 +51,7 @@ public class PortfolioService {
                                           PortfolioItemDto dto,
                                           MultipartFile image) throws IOException {
         if (getPortfolioCount(specialist) >= 20) {
-            throw new RuntimeException("Достигнут лимит фотографий в портфолио (максимум 20)");
+            throw new BusinessRuleException("Достигнут лимит фотографий в портфолио (максимум 20)");
         }
 
         String imageUrl = saveImage(image);
@@ -69,11 +73,11 @@ public class PortfolioService {
     @Transactional
     public void deletePortfolioItem(SpecialistProfile specialist, Long itemId) {
         PortfolioItem item = portfolioItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Работа не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Работа не найдена"));
 
         // Исправлено: используем specialistProfile
         if (!item.getSpecialistProfile().getId().equals(specialist.getId())) {
-            throw new RuntimeException("Нет прав для удаления этой работы");
+            throw new BusinessRuleException("Нет прав для удаления этой работы");
         }
 
         deleteImage(item.getImageUrl());
@@ -90,6 +94,9 @@ public class PortfolioService {
         }
 
         String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new BusinessRuleException("Некорректное имя файла");
+        }
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         String filename = UUID.randomUUID().toString() + extension;
 
@@ -110,7 +117,7 @@ public class PortfolioService {
                 Files.deleteIfExists(filePath);
             }
         } catch (IOException e) {
-            System.err.println("Ошибка при удалении файла: " + e.getMessage());
+            log.error("Ошибка при удалении файла: {}", imageUrl, e);
         }
     }
 }

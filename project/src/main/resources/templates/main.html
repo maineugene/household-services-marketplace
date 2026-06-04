@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платформа подбора специалистов</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<!-- Container for aside and main -->
+<div class="container">
+    <!-- Aside Section (Navigation Bar) -->
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="/">Главная</a></li>
+
+                <!-- Ссылки для всех авторизованных пользователей -->
+                <th:block th:if="${isAuthenticated}">
+                    <li><a href="/search">Найти специалиста</a></li>
+                    <li><a href="/orders/create">Создать заказ</a></li>
+                    <li><a href="/orders/my">Мои заказы</a></li>
+                    <li><a href="/specialist/profile/view">Мой профиль</a></li>
+                </th:block>
+
+                <!-- Ссылки для специалиста -->
+                <th:block th:if="${userRole == 'SPECIALIST'}">
+                    <li><a href="/orders/available">Доступные заказы</a></li>
+                    <li><a href="/bids/my">Мои заявки</a></li>
+                    <li><a href="/orders/my-work">Мои задания</a></li>
+                </th:block>
+
+                <!-- Ссылки для модератора -->
+                <th:block th:if="${userRole == 'MODERATOR' or userRole == 'ADMIN'}">
+                    <li><a href="/moderation/dashboard">Модерация</a></li>
+                </th:block>
+
+                <!-- Ссылки для администратора -->
+                <th:block th:if="${userRole == 'ADMIN'}">
+                    <li><a href="/admin/dashboard">Админ-панель</a></li>
+                </th:block>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <th:block th:if="${!isAuthenticated}">
+            <h1>Добро пожаловать на платформу!</h1>
+            <p>Найдите лучших специалистов для любых задач</p>
+            <a th:href="@{/login}">Войти</a>
+            <a th:href="@{/register}">Зарегистрироваться</a>
+        </th:block>
+
+        <th:block th:if="${isAuthenticated}">
+            <h1>Здравствуйте, <span th:text="${user.firstName} + ' ' + ${user.lastName}"></span>!</h1>
+            <p th:text="${welcomeMessage}"></p>
+            <p>Ваша роль: <strong th:text="${userRole}"></strong></p>
+        </th:block>
+    </main>
+</div>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Платформа подбора специалистов. Все права защищены.</p>
+</footer>
+
+</body>
+</html>

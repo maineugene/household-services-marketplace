@@ -129,6 +129,9 @@ public class SearchService {
      * Сортировка специалистов
      */
     private List<SpecialistProfile> sortSpecialists(List<SpecialistProfile> specialists, String sortBy) {
+        if (sortBy == null) {
+            sortBy = "rating_desc";
+        }
         switch (sortBy) {
             case "rating_desc":
                 specialists.sort(Comparator.comparing(SpecialistProfile::getAverageRating).reversed());

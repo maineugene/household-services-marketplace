@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,7 +34,7 @@ public class OrderService {
                 List.of(OrderStatus.ACTIVE, OrderStatus.IN_PROGRESS));
 
         if (activeOrdersCount >= MAX_ACTIVE_ORDERS) {
-            throw new RuntimeException("Превышен лимит активных заказов (максимум " + MAX_ACTIVE_ORDERS + ")");
+            throw new BusinessRuleException("Превышен лимит активных заказов (максимум " + MAX_ACTIVE_ORDERS + ")");
         }
 
         Order order = Order.builder()
@@ -86,16 +89,16 @@ public class OrderService {
     @Transactional
     public Order selectSpecialist(Long orderId, User specialist) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
 
         // Проверяем, что заказ еще активен
         if (order.getStatus() != OrderStatus.ACTIVE) {
-            throw new RuntimeException("Заказ уже не активен");
+            throw new BusinessRuleException("Заказ уже не активен");
         }
 
         // Проверяем, что текущий пользователь - заказчик
         if (!order.getCustomer().getId().equals(specialist.getId())) {
-            throw new RuntimeException("Только заказчик может выбрать исполнителя");
+            throw new BusinessRuleException("Только заказчик может выбрать исполнителя");
         }
 
         order.setSpecialist(specialist);
@@ -116,7 +119,7 @@ public class OrderService {
     @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus, User user) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
 
         // Проверяем права на изменение статуса
         if (order.getCustomer().getId().equals(user.getId())) {
@@ -124,17 +127,17 @@ public class OrderService {
             if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.COMPLETED) {
                 order.setStatus(newStatus);
             } else {
-                throw new RuntimeException("Заказчик может только отменить или завершить заказ");
+                throw new BusinessRuleException("Заказчик может только отменить или завершить заказ");
             }
         } else if (order.getSpecialist() != null && order.getSpecialist().getId().equals(user.getId())) {
             // Специалист может отметить как выполненный
             if (newStatus == OrderStatus.COMPLETED) {
                 order.setStatus(newStatus);
             } else {
-                throw new RuntimeException("Специалист может только завершить заказ");
+                throw new BusinessRuleException("Специалист может только завершить заказ");
             }
         } else {
-            throw new RuntimeException("Нет прав для изменения статуса заказа");
+            throw new BusinessRuleException("Нет прав для изменения статуса заказа");
         }
 
         order.setUpdatedAt(LocalDateTime.now());
@@ -146,6 +149,6 @@ public class OrderService {
      */
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
     }
 }

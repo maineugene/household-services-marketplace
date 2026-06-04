@@ -8,6 +8,7 @@ import com.zhukovskiy.platform.service.CustomUserDetails;
 import com.zhukovskiy.platform.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 @AllArgsConstructor
+@Slf4j
 public class MainWebController {
 
     private final CustomUserDetailsService userDetailsService;
@@ -59,7 +61,8 @@ public class MainWebController {
                 }
                 model.addAttribute("welcomeMessage", welcomeMessage);
 
-            } catch (Exception e) {
+            } catch (ClassCastException e) {
+                log.warn("Failed to extract user details from authentication principal", e);
                 model.addAttribute("isAuthenticated", false);
             }
         } else {
@@ -93,8 +96,8 @@ public class MainWebController {
         }
         try {
             userDetailsService.registerUser(form);
-        } catch (Exception userExistsAlready) {
-            // Redirect to the /register endpoint
+        } catch (Exception e) {
+            log.warn("Registration failed for email {}: {}", form.getEmail(), e.getMessage());
             result.rejectValue("email", "error.registrationForm", "User with this email already exists");
             return "redirect:/register?error";
         }
@@ -107,6 +110,7 @@ public class MainWebController {
             // Set the authentication in the SecurityContext
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
+            log.error("Auto-login failed after registration for email {}", form.getEmail(), e);
             return "redirect:/login";
         }
         // Redirect to the /login endpoint

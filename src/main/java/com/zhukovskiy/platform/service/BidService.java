@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,12 +34,12 @@ public class BidService {
     public Bid createBid(Order order, User specialist, BidDto bidDto) {
         // Проверяем, что заказ активен
         if (order.getStatus() != OrderStatus.ACTIVE) {
-            throw new RuntimeException("Заказ уже не активен");
+            throw new BusinessRuleException("Заказ уже не активен");
         }
 
         // Проверяем, что специалист еще не подавал заявку на этот заказ
         if (bidRepository.existsByOrderAndSpecialist(order, specialist)) {
-            throw new RuntimeException("Вы уже подали заявку на этот заказ");
+            throw new BusinessRuleException("Вы уже подали заявку на этот заказ");
         }
 
         Bid bid = Bid.builder()
@@ -76,18 +79,18 @@ public class BidService {
     @Transactional
     public void selectBid(Long bidId, User customer) {
         Bid bid = bidRepository.findById(bidId)
-                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена"));
 
         Order order = bid.getOrder();
 
         // Проверяем, что заказчик имеет право выбирать
         if (!order.getCustomer().getId().equals(customer.getId())) {
-            throw new RuntimeException("Только заказчик может выбрать заявку");
+            throw new BusinessRuleException("Только заказчик может выбрать заявку");
         }
 
         // Проверяем, что заказ еще активен
         if (order.getStatus() != OrderStatus.ACTIVE) {
-            throw new RuntimeException("Заказ уже не активен");
+            throw new BusinessRuleException("Заказ уже не активен");
         }
 
         // Отмечаем выбранную заявку
@@ -116,6 +119,6 @@ public class BidService {
      */
     public Bid getBidById(Long id) {
         return bidRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена"));
     }
 }

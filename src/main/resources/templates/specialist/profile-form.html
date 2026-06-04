@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование профиля</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div style="max-width: 600px; margin: 20px auto; padding: 20px;">
+    <h1 th:text="${isEdit} ? 'Редактирование профиля' : 'Создание профиля'"></h1>
+
+    <!-- ВАЖНО: правильный action -->
+    <form th:action="@{/specialist/profile/save}" th:object="${profile}" method="post">
+        <div style="margin-bottom: 15px;">
+            <label>Описание:</label><br>
+            <textarea th:field="*{description}" rows="5" style="width: 100%; padding: 10px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Опыт (лет):</label><br>
+            <input type="number" th:field="*{experienceYears}" style="width: 100%; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Образование:</label><br>
+            <input type="text" th:field="*{education}" style="width: 100%; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Категории (Ctrl+выбор):</label><br>
+            <select th:field="*{categories}" multiple style="width: 100%; padding: 10px; height: 150px;">
+                <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Почасовая ставка (₽/час):</label><br>
+            <input type="number" th:field="*{hourlyRate}" step="100" style="width: 100%; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Фиксированная цена:</label><br>
+            <input type="number" th:field="*{fixedPrice}" step="100" style="width: 100%; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>География обслуживания:</label><br>
+            <input type="text" th:field="*{serviceArea}" style="width: 100%; padding: 10px;">
+        </div>
+
+        <button type="submit" style="padding: 10px 20px;">Сохранить</button>
+    </form>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+</head>
+<body>
+<h1>Admin Dashboard</h1>
+<h1>Welcome, <span th:text="${username}">. You have logged in as admin</span>!</h1>
+<p>Total turnover this month $3500000</p>
+<p>Current stock worth $2500000</p>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+</form>
+</body>
+</html>
