@@ -1,20 +1,18 @@
 package com.zhukovskiy.platform.service;
 
 import com.zhukovskiy.platform.dto.SpecialistProfileDto;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import com.zhukovskiy.platform.mapper.SpecialistMapper;
 import com.zhukovskiy.platform.model.*;
-import com.zhukovskiy.platform.repository.ReviewRepository;
 import com.zhukovskiy.platform.repository.SpecialistProfileRepository;
 import com.zhukovskiy.platform.repository.UserRepository;
-import com.zhukovskiy.platform.exception.ResourceNotFoundException;
+import com.zhukovskiy.platform.util.ServiceCategories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +21,6 @@ public class SpecialistProfileService {
     private final SpecialistProfileRepository specialistProfileRepository;
     private final UserRepository userRepository;
     private final SpecialistMapper specialistMapper;
-    private final ReviewRepository reviewRepository;
 
     /**
      * Создание или обновление профиля специалиста
@@ -67,7 +64,7 @@ public class SpecialistProfileService {
      */
     public SpecialistProfile getProfileByUser(User user) {
         return specialistProfileRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста", user.getId()));
     }
 
     /**
@@ -75,7 +72,7 @@ public class SpecialistProfileService {
      */
     public SpecialistProfile getProfileById(Long id) {
         return specialistProfileRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста", id));
     }
 
     /**
@@ -105,7 +102,7 @@ public class SpecialistProfileService {
     @Transactional
     public void moderateProfile(Long profileId, ModerationStatus status) {
         SpecialistProfile profile = specialistProfileRepository.findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста", profileId));
 
         profile.setModerationStatus(status);
         if (status == ModerationStatus.APPROVED) {
@@ -144,62 +141,7 @@ public class SpecialistProfileService {
      * Получение всех категорий услуг
      */
     public List<String> getAllCategories() {
-        return List.of(
-                "Сантехника",
-                "Электрика",
-                "Ремонт квартир",
-                "Уборка",
-                "Переезды",
-                "Ремонт техники",
-                "Садоводство",
-                "Репетиторство",
-                "Фотография",
-                "Дизайн",
-                "Строительство",
-                "Клининг",
-                "Грузоперевозки",
-                "Красота и здоровье",
-                "IT и программирование"
-        );
+        return ServiceCategories.getAll();
     }
 
-    /**
-     * Получение одобренных отзывов о специалисте
-     */
-    public List<Review> getApprovedReviews(User specialist) {
-        return reviewRepository.findBySpecialistAndStatus(specialist, ReviewStatus.APPROVED);
-    }
-
-    /**
-     * Получение статистики рейтинга
-     */
-    public ReviewService.RatingStatistics getRatingStatistics(User specialist) {
-        List<Review> reviews = reviewRepository.findBySpecialistAndStatus(specialist, ReviewStatus.APPROVED);
-
-        if (reviews.isEmpty()) {
-            return new ReviewService.RatingStatistics(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        }
-
-        long count1 = reviews.stream().filter(r -> r.getRating() != null && r.getRating() == 1).count();
-        long count2 = reviews.stream().filter(r -> r.getRating() != null && r.getRating() == 2).count();
-        long count3 = reviews.stream().filter(r -> r.getRating() != null && r.getRating() == 3).count();
-        long count4 = reviews.stream().filter(r -> r.getRating() != null && r.getRating() == 4).count();
-        long count5 = reviews.stream().filter(r -> r.getRating() != null && r.getRating() == 5).count();
-
-        double avgRating = reviews.stream()
-                .filter(r -> r.getRating() != null)
-                .mapToInt(Review::getRating)
-                .average()
-                .orElse(0.0);
-
-        return new ReviewService.RatingStatistics(
-                reviews.size(),
-                avgRating,
-                (double) count5 / reviews.size() * 100,
-                (double) count4 / reviews.size() * 100,
-                (double) count3 / reviews.size() * 100,
-                (double) count2 / reviews.size() * 100,
-                (double) count1 / reviews.size() * 100
-        );
-    }
 }

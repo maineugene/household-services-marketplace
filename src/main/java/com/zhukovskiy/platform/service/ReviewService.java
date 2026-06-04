@@ -1,6 +1,8 @@
 package com.zhukovskiy.platform.service;
 
 import com.zhukovskiy.platform.dto.ReviewDto;
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import com.zhukovskiy.platform.model.*;
 import com.zhukovskiy.platform.repository.OrderRepository;
 import com.zhukovskiy.platform.repository.ReviewRepository;
@@ -8,9 +10,6 @@ import com.zhukovskiy.platform.repository.SpecialistProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.zhukovskiy.platform.exception.BusinessRuleException;
-import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +48,7 @@ public class ReviewService {
 
         // Получаем профиль специалиста
         SpecialistProfile specialistProfile = specialistProfileRepository.findByUser(order.getSpecialist())
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль специалиста", order.getSpecialist().getId()));
 
         Review review = Review.builder()
                 .order(order)
@@ -70,7 +69,7 @@ public class ReviewService {
      */
     public Review getReviewById(Long id) {
         return reviewRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв", id));
     }
 
     /**
@@ -79,7 +78,7 @@ public class ReviewService {
     @Transactional
     public Review respondToReview(Long parentReviewId, User specialist, String responseComment) {
         Review parentReview = reviewRepository.findById(parentReviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв", parentReviewId));
 
         // Проверяем, что отвечает специалист, которому оставлен отзыв
         if (!parentReview.getSpecialist().getId().equals(specialist.getId())) {
@@ -106,7 +105,7 @@ public class ReviewService {
     @Transactional
     public Review moderateReview(Long reviewId, ReviewStatus status, String reason) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Отзыв не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Отзыв", reviewId));
 
         review.setStatus(status);
         review.setModerationReason(reason);

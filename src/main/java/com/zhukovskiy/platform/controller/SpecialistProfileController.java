@@ -2,12 +2,14 @@ package com.zhukovskiy.platform.controller;
 
 import com.zhukovskiy.platform.dto.PortfolioItemDto;
 import com.zhukovskiy.platform.dto.SpecialistProfileDto;
-import com.zhukovskiy.platform.model.PortfolioItem;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import com.zhukovskiy.platform.model.SpecialistProfile;
 import com.zhukovskiy.platform.model.User;
 import com.zhukovskiy.platform.security.SecurityUtils;
 import com.zhukovskiy.platform.service.PortfolioService;
+import com.zhukovskiy.platform.service.ReviewService;
 import com.zhukovskiy.platform.service.SpecialistProfileService;
+import com.zhukovskiy.platform.util.ServiceCategories;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class SpecialistProfileController {
 
     private final SpecialistProfileService specialistProfileService;
     private final PortfolioService portfolioService;
+    private final ReviewService reviewService;
     private final SecurityUtils securityUtils;
 
     /**
@@ -52,7 +55,7 @@ public class SpecialistProfileController {
             model.addAttribute("isEdit", false);
         }
 
-        model.addAttribute("categories", getAvailableCategories());
+        model.addAttribute("categories", ServiceCategories.getAll());
         return "specialist/profile-form";
     }
 
@@ -66,7 +69,7 @@ public class SpecialistProfileController {
                               Model model,
                               RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("categories", getAvailableCategories());
+            model.addAttribute("categories", ServiceCategories.getAll());
             return "specialist/profile-form";
         }
 
@@ -95,8 +98,7 @@ public class SpecialistProfileController {
             model.addAttribute("profile", profile);
             model.addAttribute("portfolio", portfolioService.getPortfolioBySpecialist(profile));
 
-            // Получаем статистику рейтинга
-            var ratingStats = specialistProfileService.getRatingStatistics(currentUser);
+            var ratingStats = reviewService.getRatingStatistics(currentUser);
             model.addAttribute("ratingStats", ratingStats);
 
             return "specialist/profile-view";
@@ -114,7 +116,7 @@ public class SpecialistProfileController {
             SpecialistProfile profile = specialistProfileService.getProfileById(id);
             model.addAttribute("profile", profile);
             model.addAttribute("portfolio", portfolioService.getPortfolioBySpecialist(profile));
-            model.addAttribute("reviews", specialistProfileService.getApprovedReviews(profile.getUser()));
+            model.addAttribute("reviews", reviewService.getReviewsBySpecialist(profile.getUser()));
 
             return "specialist/public-profile";
         } catch (RuntimeException e) {
@@ -134,13 +136,6 @@ public class SpecialistProfileController {
         try {
             User currentUser = securityUtils.getCurrentUser();
             SpecialistProfile profile = specialistProfileService.getProfileByUser(currentUser);
-
-            // Проверяем количество фотографий (максимум 20)
-            int currentCount = portfolioService.getPortfolioCount(profile);
-            if (currentCount >= 20) {
-                redirectAttributes.addFlashAttribute("error", "Достигнут лимит фотографий в портфолио (максимум 20)");
-                return "redirect:/specialist/profile/view";
-            }
 
             PortfolioItemDto portfolioDto = PortfolioItemDto.builder()
                     .title(title)
@@ -203,20 +198,5 @@ public class SpecialistProfileController {
         }
 
         return "redirect:/specialist/profile/view";
-    }
-
-    private List<String> getAvailableCategories() {
-        return List.of(
-                "Сантехника",
-                "Электрика",
-                "Ремонт квартир",
-                "Уборка",
-                "Переезды",
-                "Ремонт техники",
-                "Садоводство",
-                "Репетиторство",
-                "Фотография",
-                "Дизайн"
-        );
     }
 }

@@ -1,6 +1,8 @@
 package com.zhukovskiy.platform.service;
 
 import com.zhukovskiy.platform.dto.PortfolioItemDto;
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import com.zhukovskiy.platform.model.PortfolioItem;
 import com.zhukovskiy.platform.model.SpecialistProfile;
 import com.zhukovskiy.platform.repository.PortfolioItemRepository;
@@ -54,7 +56,7 @@ public class PortfolioService {
                                           PortfolioItemDto dto,
                                           MultipartFile image) throws IOException {
         if (getPortfolioCount(specialist) >= 20) {
-            throw new RuntimeException("Достигнут лимит фотографий в портфолио (максимум 20)");
+            throw new BusinessRuleException("Достигнут лимит фотографий в портфолио (максимум 20)");
         }
 
         String imageUrl = saveImage(image);
@@ -76,7 +78,7 @@ public class PortfolioService {
     @Transactional
     public void deletePortfolioItem(SpecialistProfile specialist, Long itemId) {
         PortfolioItem item = portfolioItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Работа не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Работа портфолио", itemId));
 
         // Исправлено: используем specialistProfile
         if (!item.getSpecialistProfile().getId().equals(specialist.getId())) {

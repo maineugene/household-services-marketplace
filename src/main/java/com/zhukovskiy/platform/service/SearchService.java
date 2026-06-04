@@ -2,6 +2,7 @@ package com.zhukovskiy.platform.service;
 
 import com.zhukovskiy.platform.model.SpecialistProfile;
 import com.zhukovskiy.platform.repository.SpecialistProfileRepository;
+import com.zhukovskiy.platform.util.ServiceCategories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -196,12 +197,7 @@ public class SearchService {
      */
     public SearchFilters getAvailableFilters() {
         return SearchFilters.builder()
-                .categories(List.of(
-                        "Сантехника", "Электрика", "Ремонт квартир", "Уборка",
-                        "Переезды", "Ремонт техники", "Садоводство", "Репетиторство",
-                        "Фотография", "Дизайн", "Строительство", "Клининг",
-                        "Грузоперевозки", "Красота и здоровье", "IT и программирование"
-                ))
+                .categories(ServiceCategories.getAll())
                 .priceRange(PriceRange.builder().min(0).max(500).build())
                 .ratingRange(RatingRange.builder().min(0).max(5).step(0.5).build())
                 .experienceRange(ExperienceRange.builder().min(0).max(30).build())

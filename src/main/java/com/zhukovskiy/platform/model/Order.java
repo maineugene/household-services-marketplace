@@ -45,4 +45,13 @@ public class Order implements BaseEntity<Long> {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * Throws if the order is not in ACTIVE status.
+     */
+    public void ensureActive() {
+        if (this.status != OrderStatus.ACTIVE) {
+            throw new IllegalStateException("Заказ уже не активен");
+        }
+    }
 }

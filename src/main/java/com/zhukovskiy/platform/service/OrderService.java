@@ -1,15 +1,14 @@
 package com.zhukovskiy.platform.service;
 
 import com.zhukovskiy.platform.dto.OrderDto;
+import com.zhukovskiy.platform.exception.BusinessRuleException;
+import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import com.zhukovskiy.platform.model.*;
 import com.zhukovskiy.platform.repository.OrderRepository;
 import com.zhukovskiy.platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.zhukovskiy.platform.exception.BusinessRuleException;
-import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,12 +88,9 @@ public class OrderService {
     @Transactional
     public Order selectSpecialist(Long orderId, User specialist) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ", orderId));
 
-        // Проверяем, что заказ еще активен
-        if (order.getStatus() != OrderStatus.ACTIVE) {
-            throw new BusinessRuleException("Заказ уже не активен");
-        }
+        order.ensureActive();
 
         // Проверяем, что текущий пользователь - заказчик
         if (!order.getCustomer().getId().equals(specialist.getId())) {
@@ -119,7 +115,7 @@ public class OrderService {
     @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus, User user) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ", orderId));
 
         // Проверяем права на изменение статуса
         if (order.getCustomer().getId().equals(user.getId())) {
@@ -149,6 +145,6 @@ public class OrderService {
      */
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Заказ не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ", orderId));
     }
 }
