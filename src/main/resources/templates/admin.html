@@ -1,17 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
+    <title>Админ-панель — СпецПлатформа</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Admin Dashboard</h1>
-<h1>Welcome, <span th:text="${username}">. You have logged in as admin</span>!</h1>
-<p>Total turnover this month $3500000</p>
-<p>Current stock worth $2500000</p>
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Logout</button>
-</form>
+<div th:replace="fragments/header :: header"></div>
+
+<main class="page">
+    <div class="welcome-banner">
+        <h1>Админ-панель</h1>
+        <p>Добро пожаловать, <span th:text="${username}">администратор</span>!</p>
+    </div>
+
+    <div class="grid grid--3">
+        <div class="stat-card">
+            <div class="stat-card__label">Оборот за месяц</div>
+            <div class="stat-card__value">$3 500 000</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__label">Текущие активы</div>
+            <div class="stat-card__value">$2 500 000</div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>

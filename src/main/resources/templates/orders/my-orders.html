@@ -1,107 +1,57 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои заказы</title>
+    <title>Мои заказы — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <style>
-        .orders-container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-        .order-card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-ACTIVE { background: #ffc107; color: #333; }
-        .status-IN_PROGRESS { background: #17a2b8; color: white; }
-        .status-COMPLETED { background: #28a745; color: white; }
-        .status-CANCELLED { background: #dc3545; color: white; }
-        .order-details {
-            margin-bottom: 15px;
-        }
-        .order-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 8px 16px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .budget {
-            font-size: 20px;
-            font-weight: bold;
-            color: #28a745;
-        }
-    </style>
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div class="orders-container">
-    <h1 th:text="${role == 'customer'} ? 'Мои заказы' : 'Мои задания'"></h1>
-
-    <div th:if="${orders.empty}" class="alert alert-info">
-        У вас пока нет заказов.
-        <a th:if="${role == 'customer'}" href="/orders/create">Создать заказ</a>
+<main class="page">
+    <div class="page-header">
+        <h1 th:text="${role == 'customer'} ? 'Мои заказы' : 'Мои задания'">Мои заказы</h1>
     </div>
 
-    <div th:each="order : ${orders}" class="order-card">
-        <div class="order-header">
-            <strong>Заказ #<span th:text="${order.id}"></span></strong>
-            <span class="status" th:classappend="'status-' + ${order.status}" th:text="${order.status}"></span>
+    <div th:if="${orders.empty}" class="empty-state">
+        <div class="empty-state__icon">📋</div>
+        <p>У вас пока нет заказов.</p>
+        <a th:if="${role == 'customer'}" href="/orders/create" class="btn btn-primary" style="margin-top:14px;">Создать заказ</a>
+    </div>
+
+    <div th:each="order : ${orders}" class="card" style="margin-bottom:18px;">
+        <div class="card-header">
+            <strong>Заказ #<span th:text="${order.id}">0</span></strong>
+            <span class="status" th:classappend="'status-' + ${order.status}" th:text="${order.status}">STATUS</span>
         </div>
 
-        <div class="order-details">
-            <p><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
-            <p><strong>Адрес:</strong> <span th:text="${order.address}"></span></p>
-            <p><strong>Бюджет:</strong> <span class="budget" th:text="${order.budget} + ' ₽'"></span></p>
-            <p><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></p>
-            <p th:if="${order.specialist != null}">
+        <div class="stack">
+            <div class="detail-row"><strong>Описание:</strong> <span th:text="${order.description}"></span></div>
+            <div class="detail-row"><strong>Адрес:</strong> <span th:text="${order.address}"></span></div>
+            <div class="detail-row"><strong>Бюджет:</strong> <span class="price" th:text="${order.budget} + ' ₽'"></span></div>
+            <div class="detail-row"><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></div>
+            <div class="detail-row" th:if="${order.specialist != null}">
                 <strong>Исполнитель:</strong>
                 <span th:text="${order.specialist.firstName + ' ' + order.specialist.lastName}"></span>
-            </p>
+            </div>
         </div>
 
-        <div class="order-actions">
-            <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-primary">Подробнее</a>
+        <div class="actions">
+            <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-primary btn-sm">Подробнее</a>
 
             <form th:if="${role == 'customer' and order.status == 'ACTIVE'}"
-                  th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" style="display: inline;">
-                <button type="submit" class="btn btn-danger">Отменить</button>
+                  th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post">
+                <button type="submit" class="btn btn-danger btn-sm">Отменить</button>
             </form>
 
             <form th:if="${(role == 'customer' or role == 'specialist') and order.status == 'IN_PROGRESS'}"
-                  th:action="@{/orders/{id}/complete(id=${order.id})}" method="post" style="display: inline;">
-                <button type="submit" class="btn btn-success">Завершить</button>
+                  th:action="@{/orders/{id}/complete(id=${order.id})}" method="post">
+                <button type="submit" class="btn btn-success btn-sm">Завершить</button>
             </form>
         </div>
     </div>
-</div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

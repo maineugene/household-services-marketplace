@@ -1,40 +1,52 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Результаты поиска</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div style="max-width: 1000px; margin: 20px auto; padding: 20px;">
-    <h1>Результаты поиска</h1>
-    <a href="/search">← Новый поиск</a>
-    <p>Найдено: <span th:text="${totalResults}"></span> специалистов</p>
+<main class="page">
+    <a href="/search" class="btn-back">← Новый поиск</a>
 
-    <!-- Сортировка -->
-    <div style="margin: 20px 0;">
-        <label>Сортировать:</label>
-        <select id="sortSelect" onchange="window.location.href=this.value">
-            <option value="?sortBy=rating_desc" th:selected="${param.sortBy == 'rating_desc'}">По рейтингу (высокий)</option>
-            <option value="?sortBy=price_asc" th:selected="${param.sortBy == 'price_asc'}">По цене (дешевые)</option>
-        </select>
+    <div class="toolbar">
+        <div class="page-header" style="margin-bottom:0;">
+            <h1>Результаты поиска</h1>
+            <p>Найдено специалистов: <strong th:text="${totalResults}">0</strong></p>
+        </div>
+        <div class="inline-field">
+            <label for="sortSelect" style="margin-bottom:0;">Сортировка:</label>
+            <select id="sortSelect" onchange="window.location.href=this.value">
+                <option value="?sortBy=rating_desc" th:selected="${param.sortBy == 'rating_desc'}">По рейтингу (высокий)</option>
+                <option value="?sortBy=price_asc" th:selected="${param.sortBy == 'price_asc'}">По цене (дешевле)</option>
+            </select>
+        </div>
     </div>
 
-    <div th:if="${specialists.empty}" style="text-align: center; padding: 50px;">
-        <p>Ничего не найдено</p>
+    <div th:if="${specialists.empty}" class="empty-state">
+        <div class="empty-state__icon">🔍</div>
+        <p>По вашему запросу ничего не найдено.</p>
+        <a href="/search" class="btn btn-primary" style="margin-top:14px;">Изменить параметры</a>
     </div>
 
-    <div th:each="spec : ${specialists}" style="border: 1px solid #ddd; padding: 15px; margin-top: 15px; border-radius: 5px;">
-        <h3 th:text="${spec.user.firstName} + ' ' + ${spec.user.lastName}"></h3>
-        <p th:text="${spec.description}"></p>
-        <p>⭐ <span th:text="${spec.averageRating}"></span></p>
-        <p>💰 <span th:text="${spec.hourlyRate != null ? spec.hourlyRate + ' ₽/час' : spec.fixedPrice + ' ₽'}"></span></p>
-        <p>📍 <span th:text="${spec.serviceArea}"></span></p>
-        <a th:href="@{/specialist/public/{id}(id=${spec.id})}" class="btn">Подробнее</a>
+    <div class="grid grid--cards" th:unless="${specialists.empty}">
+        <div th:each="spec : ${specialists}" class="card card--hover">
+            <h3 class="card__title" th:text="${spec.user.firstName} + ' ' + ${spec.user.lastName}">Имя</h3>
+            <p class="text-muted" th:text="${spec.description}">Описание</p>
+            <div class="stack" style="margin-top:14px;">
+                <div><span class="rating">⭐ <span th:text="${spec.averageRating}">0</span></span></div>
+                <div class="price" th:text="${spec.hourlyRate != null ? spec.hourlyRate + ' ₽/час' : spec.fixedPrice + ' ₽'}">0 ₽</div>
+                <div class="text-muted">📍 <span th:text="${spec.serviceArea}">Город</span></div>
+            </div>
+            <div class="actions">
+                <a th:href="@{/specialist/public/{id}(id=${spec.id})}" class="btn btn-primary btn-sm">Подробнее</a>
+            </div>
+        </div>
     </div>
-</div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

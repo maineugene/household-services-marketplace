@@ -1,14 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greeting Page</title>
+    <title>Приветствие — СпецПлатформа</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Hello, <span th:text="${user.email}"></span>!</h1>
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Logout</button>
-</form>
+<div th:replace="fragments/header :: header"></div>
+
+<main class="page--auth">
+    <div class="form-card text-center">
+        <h1 style="margin-bottom:18px;">Здравствуйте, <span th:text="${user.email}">пользователь</span>!</h1>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-secondary">Выйти</button>
+        </form>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>

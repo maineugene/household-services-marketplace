@@ -1,75 +1,41 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подача заявки</title>
+    <title>Подача заявки — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <style>
-        .bid-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 10px;
-        }
-        .order-info {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div class="bid-container">
-    <h1>Подача заявки на заказ</h1>
-
-    <div class="order-info">
-        <h3>Информация о заказе</h3>
-        <p><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
-        <p><strong>Бюджет заказчика:</strong> <span th:text="${order.budget} + ' ₽'"></span></p>
-        <p><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></p>
+<main class="page page--narrow">
+    <div class="page-header">
+        <h1>Подача заявки</h1>
+        <p>Предложите свою цену и расскажите, как выполните работу.</p>
     </div>
 
-    <form th:action="@{/bids/create/{orderId}(orderId=${order.id})}" th:object="${bid}" method="post">
-        <div class="form-group">
-            <label>Ваша цена (₽):</label>
-            <input type="number" th:field="*{price}" step="100" required>
-        </div>
+    <div class="card" style="margin-bottom:18px; background:var(--color-primary-light); border-color:transparent;">
+        <h3 style="margin-bottom:12px;">Информация о заказе</h3>
+        <div class="detail-row"><strong>Описание:</strong> <span th:text="${order.description}"></span></div>
+        <div class="detail-row"><strong>Бюджет заказчика:</strong> <span class="price" th:text="${order.budget} + ' ₽'"></span></div>
+        <div class="detail-row"><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></div>
+    </div>
 
-        <div class="form-group">
-            <label>Комментарий к заявке:</label>
-            <textarea th:field="*{comment}" placeholder="Опишите, как вы планируете выполнить работу..."></textarea>
-        </div>
-
-        <button type="submit">Подать заявку</button>
-    </form>
-</div>
+    <div class="card">
+        <form th:action="@{/bids/create/{orderId}(orderId=${order.id})}" th:object="${bid}" method="post">
+            <div class="form-group">
+                <label>Ваша цена (₽)</label>
+                <input type="number" th:field="*{price}" step="100" required>
+            </div>
+            <div class="form-group">
+                <label>Комментарий к заявке</label>
+                <textarea th:field="*{comment}" placeholder="Опишите, как вы планируете выполнить работу..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Подать заявку</button>
+        </form>
+    </div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

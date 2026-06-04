@@ -1,31 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Детали заказа</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали заказа — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div style="max-width: 800px; margin: 20px auto; padding: 20px;">
-    <h1>Детали заказа #<span th:text="${order.id}"></span></h1>
+<main class="page page--narrow">
+    <a href="/orders/my" class="btn-back">← Назад к заказам</a>
 
-    <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
-        <p><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
-        <p><strong>Адрес:</strong> <span th:text="${order.address}"></span></p>
-        <p><strong>Бюджет:</strong> <span th:text="${order.budget} + ' ₽'"></span></p>
-        <p><strong>Статус:</strong> <span th:text="${order.status}"></span></p>
+    <div class="page-header">
+        <h1>Заказ #<span th:text="${order.id}">0</span></h1>
+    </div>
 
-        <div th:if="${showBidsLink}" style="margin-top: 20px;">
-            <a th:href="@{/bids/order/{orderId}(orderId=${order.id})}" class="btn">Просмотр заявок (<span th:text="${bidsCount}"></span>)</a>
+    <div class="card">
+        <div class="stack">
+            <div class="detail-row"><strong>Описание:</strong> <span th:text="${order.description}"></span></div>
+            <div class="detail-row"><strong>Адрес:</strong> <span th:text="${order.address}"></span></div>
+            <div class="detail-row"><strong>Бюджет:</strong> <span class="price" th:text="${order.budget} + ' ₽'"></span></div>
+            <div class="detail-row">
+                <strong>Статус:</strong>
+                <span class="status" th:classappend="'status-' + ${order.status}" th:text="${order.status}">STATUS</span>
+            </div>
         </div>
 
-        <div th:if="${canApply}" style="margin-top: 20px;">
-            <a th:href="@{/bids/create/{orderId}(orderId=${order.id})}" class="btn">Подать заявку</a>
+        <div class="actions">
+            <a th:if="${showBidsLink}" th:href="@{/bids/order/{orderId}(orderId=${order.id})}" class="btn btn-primary">
+                Просмотр заявок (<span th:text="${bidsCount}">0</span>)
+            </a>
+            <a th:if="${canApply}" th:href="@{/bids/create/{orderId}(orderId=${order.id})}" class="btn btn-success">
+                Подать заявку
+            </a>
         </div>
     </div>
-</div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>
