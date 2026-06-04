@@ -9,15 +9,19 @@ import com.zhukovskiy.platform.service.BidService;
 import com.zhukovskiy.platform.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class OrderController {
 
     private final OrderService orderService;
@@ -27,6 +31,7 @@ public class OrderController {
     /**
      * Форма создания заказа
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("order", new OrderDto());
@@ -36,6 +41,7 @@ public class OrderController {
     /**
      * Создание заказа
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/create")
     public String createOrder(@Valid @ModelAttribute("order") OrderDto orderDto,
                               BindingResult result,
@@ -50,7 +56,8 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("success", "Заказ успешно создан!");
             return "redirect:/orders/my";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при создании заказа: " + e.getMessage());
+            log.error("Ошибка при создании заказа", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при создании заказа");
             return "redirect:/orders/create";
         }
     }
@@ -80,6 +87,7 @@ public class OrderController {
     /**
      * Доступные заказы для специалистов
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @GetMapping("/available")
     public String availableOrders(Model model) {
         User currentUser = securityUtils.getCurrentUser();
@@ -122,7 +130,8 @@ public class OrderController {
             orderService.updateOrderStatus(id, OrderStatus.CANCELLED, currentUser);
             redirectAttributes.addFlashAttribute("success", "Заказ отменен");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            log.error("Ошибка при отмене заказа", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при отмене заказа");
         }
         return "redirect:/orders/my";
     }
@@ -137,7 +146,8 @@ public class OrderController {
             orderService.updateOrderStatus(id, OrderStatus.COMPLETED, currentUser);
             redirectAttributes.addFlashAttribute("success", "Заказ завершен");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            log.error("Ошибка при завершении заказа", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при завершении заказа");
         }
         return "redirect:/orders/my";
     }

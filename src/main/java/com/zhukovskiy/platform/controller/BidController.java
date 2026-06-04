@@ -8,15 +8,19 @@ import com.zhukovskiy.platform.service.BidService;
 import com.zhukovskiy.platform.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/bids")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class BidController {
 
     private final BidService bidService;
@@ -26,6 +30,7 @@ public class BidController {
     /**
      * Форма подачи заявки на заказ
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @GetMapping("/create/{orderId}")
     public String showCreateBidForm(@PathVariable Long orderId, Model model) {
         Order order = orderService.getOrderById(orderId);
@@ -37,6 +42,7 @@ public class BidController {
     /**
      * Подача заявки на заказ
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @PostMapping("/create/{orderId}")
     public String createBid(@PathVariable Long orderId,
                             @Valid @ModelAttribute("bid") BidDto bidDto,
@@ -54,7 +60,8 @@ public class BidController {
             bidService.createBid(order, currentUser, bidDto);
             redirectAttributes.addFlashAttribute("success", "Заявка успешно подана!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при подаче заявки: " + e.getMessage());
+            log.error("Ошибка при подаче заявки", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при подаче заявки");
         }
 
         return "redirect:/orders/" + orderId;
@@ -63,6 +70,7 @@ public class BidController {
     /**
      * Выбор заявки (для заказчика)
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/{bidId}/select")
     public String selectBid(@PathVariable Long bidId, RedirectAttributes redirectAttributes) {
         try {
@@ -70,10 +78,11 @@ public class BidController {
             bidService.selectBid(bidId, currentUser);
             redirectAttributes.addFlashAttribute("success", "Специалист выбран! Заказ передан в работу.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            log.error("Ошибка при выборе заявки", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при выборе заявки");
         }
 
-        return "redirect:/bids";
+        return "redirect:/bids/my";
     }
 
     /**
@@ -84,23 +93,5 @@ public class BidController {
         User currentUser = securityUtils.getCurrentUser();
         model.addAttribute("bids", bidService.getBidsBySpecialist(currentUser));
         return "bids/my-bids";
-    }
-
-    /**
-     * Заявки на заказ (для заказчика)
-     */
-    @GetMapping("/order/{orderId}")
-    public String orderBids(@PathVariable Long orderId, Model model) {
-        Order order = orderService.getOrderById(orderId);
-        User currentUser = securityUtils.getCurrentUser();
-
-        // Проверяем, что текущий пользователь - заказчик
-        if (!order.getCustomer().getId().equals(currentUser.getId())) {
-            return "redirect:/orders/my";
-        }
-
-        model.addAttribute("order", order);
-        model.addAttribute("bids", bidService.getBidsByOrder(order));
-        return "bids/order-bids";
     }
 }

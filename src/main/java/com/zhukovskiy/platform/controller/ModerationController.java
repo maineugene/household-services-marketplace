@@ -8,12 +8,14 @@ import com.zhukovskiy.platform.security.SecurityUtils;
 import com.zhukovskiy.platform.service.ReviewService;
 import com.zhukovskiy.platform.service.SpecialistProfileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/moderation")
 @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -55,7 +57,8 @@ public class ModerationController {
             specialistProfileService.moderateProfile(id, ModerationStatus.APPROVED);
             redirectAttributes.addFlashAttribute("success", "Профиль специалиста одобрен");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при одобрении: " + e.getMessage());
+            log.error("Ошибка при одобрении профиля", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при одобрении профиля");
         }
         return "redirect:/moderation/dashboard";
     }
@@ -71,7 +74,8 @@ public class ModerationController {
             specialistProfileService.moderateProfile(id, ModerationStatus.REJECTED);
             redirectAttributes.addFlashAttribute("warning", "Профиль отклонен. Причина: " + reason);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при отклонении: " + e.getMessage());
+            log.error("Ошибка при отклонении профиля", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при отклонении профиля");
         }
         return "redirect:/moderation/dashboard";
     }
@@ -96,7 +100,8 @@ public class ModerationController {
             reviewService.moderateReview(id, ReviewStatus.APPROVED, null);
             redirectAttributes.addFlashAttribute("success", "Отзыв одобрен и опубликован");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при одобрении: " + e.getMessage());
+            log.error("Ошибка при одобрении отзыва", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при одобрении отзыва");
         }
         return "redirect:/moderation/dashboard";
     }
@@ -112,7 +117,8 @@ public class ModerationController {
             reviewService.moderateReview(id, ReviewStatus.REJECTED, reason);
             redirectAttributes.addFlashAttribute("warning", "Отзыв отклонен. Причина: " + reason);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при отклонении: " + e.getMessage());
+            log.error("Ошибка при отклонении отзыва", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при отклонении отзыва");
         }
         return "redirect:/moderation/dashboard";
     }

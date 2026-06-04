@@ -4,10 +4,7 @@ import com.zhukovskiy.platform.dto.PortfolioItemDto;
 import com.zhukovskiy.platform.model.PortfolioItem;
 import com.zhukovskiy.platform.model.SpecialistProfile;
 import com.zhukovskiy.platform.repository.PortfolioItemRepository;
-import com.zhukovskiy.platform.exception.BusinessRuleException;
-import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,16 +15,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PortfolioService {
 
     private final PortfolioItemRepository portfolioItemRepository;
 
-    private final String UPLOAD_DIR = "uploads/portfolio/";
+    private static final String UPLOAD_DIR = "uploads/portfolio/";
+
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/gif", "image/webp"
+    );
+
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
     /**
      * Получение портфолио специалиста
@@ -51,7 +54,7 @@ public class PortfolioService {
                                           PortfolioItemDto dto,
                                           MultipartFile image) throws IOException {
         if (getPortfolioCount(specialist) >= 20) {
-            throw new BusinessRuleException("Достигнут лимит фотографий в портфолио (максимум 20)");
+            throw new RuntimeException("Достигнут лимит фотографий в портфолио (максимум 20)");
         }
 
         String imageUrl = saveImage(image);
@@ -73,11 +76,11 @@ public class PortfolioService {
     @Transactional
     public void deletePortfolioItem(SpecialistProfile specialist, Long itemId) {
         PortfolioItem item = portfolioItemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Работа не найдена"));
+                .orElseThrow(() -> new RuntimeException("Работа не найдена"));
 
         // Исправлено: используем specialistProfile
         if (!item.getSpecialistProfile().getId().equals(specialist.getId())) {
-            throw new BusinessRuleException("Нет прав для удаления этой работы");
+            throw new RuntimeException("Нет прав для удаления этой работы");
         }
 
         deleteImage(item.getImageUrl());
@@ -88,19 +91,39 @@ public class PortfolioService {
      * Сохранение изображения на диск
      */
     private String saveImage(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Файл не может быть пустым");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("Размер файла превышает допустимый лимит (10 МБ)");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Недопустимый формат файла. Разрешены: JPEG, PNG, GIF, WebP");
+        }
+
+        String extension = switch (contentType) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/gif" -> ".gif";
+            case "image/webp" -> ".webp";
+            default -> throw new IllegalArgumentException("Недопустимый формат файла");
+        };
+
         Path uploadPath = Paths.get(UPLOAD_DIR);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || !originalFilename.contains(".")) {
-            throw new BusinessRuleException("Некорректное имя файла");
-        }
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         String filename = UUID.randomUUID().toString() + extension;
+        Path filePath = uploadPath.resolve(filename).normalize();
 
-        Path filePath = uploadPath.resolve(filename);
+        if (!filePath.startsWith(uploadPath)) {
+            throw new IllegalArgumentException("Некорректный путь к файлу");
+        }
+
         Files.copy(file.getInputStream(), filePath);
 
         return "/uploads/portfolio/" + filename;
@@ -117,7 +140,7 @@ public class PortfolioService {
                 Files.deleteIfExists(filePath);
             }
         } catch (IOException e) {
-            log.error("Ошибка при удалении файла: {}", imageUrl, e);
+            System.err.println("Ошибка при удалении файла: " + e.getMessage());
         }
     }
 }

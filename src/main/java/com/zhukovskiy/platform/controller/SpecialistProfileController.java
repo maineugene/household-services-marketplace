@@ -8,9 +8,10 @@ import com.zhukovskiy.platform.model.User;
 import com.zhukovskiy.platform.security.SecurityUtils;
 import com.zhukovskiy.platform.service.PortfolioService;
 import com.zhukovskiy.platform.service.SpecialistProfileService;
-import com.zhukovskiy.platform.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,9 +22,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/specialist")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class SpecialistProfileController {
 
     private final SpecialistProfileService specialistProfileService;
@@ -33,6 +36,7 @@ public class SpecialistProfileController {
     /**
      * Страница создания/редактирования профиля специалиста
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @GetMapping("/profile/edit")
     public String showEditProfileForm(Model model) {
         User currentUser = securityUtils.getCurrentUser();
@@ -42,7 +46,8 @@ public class SpecialistProfileController {
             SpecialistProfileDto profileDto = specialistProfileService.convertToDto(profile);
             model.addAttribute("profile", profileDto);
             model.addAttribute("isEdit", true);
-        } catch (ResourceNotFoundException e) {
+        } catch (RuntimeException e) {
+            // Профиль не найден, создаем новый
             model.addAttribute("profile", new SpecialistProfileDto());
             model.addAttribute("isEdit", false);
         }
@@ -54,6 +59,7 @@ public class SpecialistProfileController {
     /**
      * Сохранение профиля специалиста
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @PostMapping("/profile/save")
     public String saveProfile(@Valid @ModelAttribute("profile") SpecialistProfileDto profileDto,
                               BindingResult result,
@@ -70,7 +76,8 @@ public class SpecialistProfileController {
             redirectAttributes.addFlashAttribute("success", "Профиль успешно сохранен и отправлен на модерацию");
             return "redirect:/specialist/profile/view";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при сохранении профиля: " + e.getMessage());
+            log.error("Ошибка при сохранении профиля", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при сохранении профиля");
             return "redirect:/specialist/profile/edit";
         }
     }
@@ -78,6 +85,7 @@ public class SpecialistProfileController {
     /**
      * Просмотр профиля специалиста
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @GetMapping("/profile/view")
     public String viewProfile(Model model) {
         User currentUser = securityUtils.getCurrentUser();
@@ -92,7 +100,7 @@ public class SpecialistProfileController {
             model.addAttribute("ratingStats", ratingStats);
 
             return "specialist/profile-view";
-        } catch (ResourceNotFoundException e) {
+        } catch (RuntimeException e) {
             return "redirect:/specialist/profile/edit";
         }
     }
@@ -109,7 +117,7 @@ public class SpecialistProfileController {
             model.addAttribute("reviews", specialistProfileService.getApprovedReviews(profile.getUser()));
 
             return "specialist/public-profile";
-        } catch (ResourceNotFoundException e) {
+        } catch (RuntimeException e) {
             return "error/404";
         }
     }
@@ -117,6 +125,7 @@ public class SpecialistProfileController {
     /**
      * Добавление работы в портфолио
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @PostMapping("/portfolio/add")
     public String addPortfolioItem(@RequestParam("title") String title,
                                    @RequestParam("description") String description,
@@ -141,7 +150,8 @@ public class SpecialistProfileController {
             portfolioService.addPortfolioItem(profile, portfolioDto, image);
             redirectAttributes.addFlashAttribute("success", "Работа успешно добавлена в портфолио");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при добавлении: " + e.getMessage());
+            log.error("Ошибка при добавлении в портфолио", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при добавлении в портфолио");
         }
 
         return "redirect:/specialist/profile/view";
@@ -150,6 +160,7 @@ public class SpecialistProfileController {
     /**
      * Удаление работы из портфолио
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @PostMapping("/portfolio/delete/{itemId}")
     public String deletePortfolioItem(@PathVariable Long itemId, RedirectAttributes redirectAttributes) {
         try {
@@ -158,7 +169,8 @@ public class SpecialistProfileController {
             portfolioService.deletePortfolioItem(profile, itemId);
             redirectAttributes.addFlashAttribute("success", "Работа удалена из портфолио");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при удалении: " + e.getMessage());
+            log.error("Ошибка при удалении из портфолио", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при удалении из портфолио");
         }
 
         return "redirect:/specialist/profile/view";
@@ -167,6 +179,7 @@ public class SpecialistProfileController {
     /**
      * Редактирование услуг и цен
      */
+    @PreAuthorize("hasRole('SPECIALIST')")
     @PostMapping("/services/update")
     public String updateServices(@RequestParam(required = false) String hourlyRate,
                                  @RequestParam(required = false) String fixedPrice,
@@ -185,7 +198,8 @@ public class SpecialistProfileController {
             specialistProfileService.updateProfile(profile);
             redirectAttributes.addFlashAttribute("success", "Услуги и цены успешно обновлены");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при обновлении: " + e.getMessage());
+            log.error("Ошибка при обновлении услуг", e);
+            redirectAttributes.addFlashAttribute("error", "Ошибка при обновлении услуг");
         }
 
         return "redirect:/specialist/profile/view";
