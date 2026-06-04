@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
 </head>
 <body>
-<footer th:fragment="footer" style="background: #333; color: white; text-align: center; padding: 20px; margin-top: 40px;">
-    <p>&copy; 2026 Платформа подбора специалистов. Все права защищены.</p>
+<footer th:fragment="footer" class="site-footer">
+    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span>
+        СпецПлатформа — подбор специалистов для любых задач. Все права защищены.</p>
 </footer>
 </body>
 </html>

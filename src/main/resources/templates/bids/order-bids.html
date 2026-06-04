@@ -1,123 +1,63 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заявки на заказ</title>
+    <title>Заявки на заказ — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <style>
-        .bids-container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        .bid-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: white;
-        }
-        .bid-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .specialist-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        .price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #28a745;
-        }
-        .select-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .select-btn:hover {
-            background: #218838;
-        }
-        .selected-badge {
-            background: #28a745;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-        .order-info {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .btn-back {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #6c757d;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div class="bids-container">
+<main class="page">
     <a href="/orders/my" class="btn-back">← Назад к моим заказам</a>
 
-    <h1>Заявки на заказ #<span th:text="${order.id}"></span></h1>
-
-    <div class="order-info">
-        <h3>Информация о заказе</h3>
-        <p><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
-        <p><strong>Адрес:</strong> <span th:text="${order.address}"></span></p>
-        <p><strong>Бюджет:</strong> <span th:text="${order.budget} + ' ₽'"></span></p>
-        <p><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></p>
-        <p><strong>Статус:</strong>
-            <span th:if="${order.status == 'ACTIVE'}" style="color: #ffc107;">Активен</span>
-            <span th:if="${order.status == 'IN_PROGRESS'}" style="color: #17a2b8;">В работе</span>
-            <span th:if="${order.status == 'COMPLETED'}" style="color: #28a745;">Завершен</span>
-        </p>
+    <div class="page-header">
+        <h1>Заявки на заказ #<span th:text="${order.id}">0</span></h1>
     </div>
 
-    <div th:if="${bids.empty}" style="text-align: center; padding: 50px;">
+    <div class="card" style="margin-bottom:22px; background:var(--color-primary-light); border-color:transparent;">
+        <h3 style="margin-bottom:12px;">Информация о заказе</h3>
+        <div class="detail-row"><strong>Описание:</strong> <span th:text="${order.description}"></span></div>
+        <div class="detail-row"><strong>Адрес:</strong> <span th:text="${order.address}"></span></div>
+        <div class="detail-row"><strong>Бюджет:</strong> <span class="price" th:text="${order.budget} + ' ₽'"></span></div>
+        <div class="detail-row"><strong>Срок:</strong> <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span></div>
+        <div class="detail-row">
+            <strong>Статус:</strong>
+            <span class="badge badge-warning" th:if="${order.status == 'ACTIVE'}">Активен</span>
+            <span class="badge badge-info" th:if="${order.status == 'IN_PROGRESS'}">В работе</span>
+            <span class="badge badge-success" th:if="${order.status == 'COMPLETED'}">Завершён</span>
+        </div>
+    </div>
+
+    <div th:if="${bids.empty}" class="empty-state">
+        <div class="empty-state__icon">📨</div>
         <p>Пока нет заявок на этот заказ.</p>
     </div>
 
-    <div th:each="bid : ${bids}" class="bid-card">
-        <div class="bid-header">
+    <div th:each="bid : ${bids}" class="card" style="margin-bottom:16px;">
+        <div class="card-header">
             <div>
-                <div class="specialist-name" th:text="${bid.specialist.firstName} + ' ' + ${bid.specialist.lastName}"></div>
-                <div style="font-size: 12px; color: #666;">⭐ Рейтинг: <span th:text="${bid.specialist.specialistProfile?.averageRating ?: 'Нет оценок'}"></span></div>
+                <div style="font-weight:700; font-size:1.05rem;" th:text="${bid.specialist.firstName} + ' ' + ${bid.specialist.lastName}">Имя</div>
+                <div class="card__meta">⭐ Рейтинг: <span th:text="${bid.specialist.specialistProfile?.averageRating ?: 'Нет оценок'}">—</span></div>
             </div>
-            <div th:if="${bid.isSelected}" class="selected-badge">✅ Выбранный исполнитель</div>
+            <span th:if="${bid.isSelected}" class="badge badge-success">✅ Выбранный исполнитель</span>
         </div>
 
-        <div class="bid-details">
-            <p><strong>Предложенная цена:</strong> <span class="price" th:text="${bid.price} + ' ₽'"></span></p>
-            <p><strong>Комментарий специалиста:</strong> <span th:text="${bid.comment}"></span></p>
-            <p><strong>Дата подачи:</strong> <span th:text="${#temporals.format(bid.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+        <div class="stack">
+            <div class="detail-row"><strong>Предложенная цена:</strong> <span class="price" th:text="${bid.price} + ' ₽'"></span></div>
+            <div class="detail-row"><strong>Комментарий:</strong> <span th:text="${bid.comment}"></span></div>
+            <div class="detail-row"><strong>Дата подачи:</strong> <span th:text="${#temporals.format(bid.createdAt, 'dd.MM.yyyy HH:mm')}"></span></div>
         </div>
 
-        <form th:if="${order.status == 'ACTIVE' and !bid.isSelected}"
-              th:action="@{/bids/{bidId}/select(bidId=${bid.id})}"
-              method="post" style="margin-top: 10px;">
-            <button type="submit" class="select-btn">Выбрать этого специалиста</button>
-        </form>
+        <div class="actions">
+            <form th:if="${order.status == 'ACTIVE' and !bid.isSelected}"
+                  th:action="@{/bids/{bidId}/select(bidId=${bid.id})}" method="post">
+                <button type="submit" class="btn btn-success btn-sm">Выбрать этого специалиста</button>
+            </form>
+        </div>
     </div>
-</div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

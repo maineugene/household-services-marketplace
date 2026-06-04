@@ -1,27 +1,36 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Доступные заказы</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступные заказы — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div style="max-width: 1000px; margin: 20px auto; padding: 20px;">
-    <h1>Доступные заказы</h1>
-
-    <div th:if="${orders.empty}">
-        <p>Нет доступных заказов.</p>
+<main class="page">
+    <div class="page-header">
+        <h1>Доступные заказы</h1>
+        <p>Откликайтесь на заказы и получайте работу.</p>
     </div>
 
-    <div th:each="order : ${orders}" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
-        <h3>Заказ #<span th:text="${order.id}"></span></h3>
-        <p><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
-        <p><strong>Бюджет:</strong> <span th:text="${order.budget} + ' ₽'"></span></p>
-        <a th:href="@{/orders/{id}(id=${order.id})}" class="btn">Подробнее</a>
+    <div th:if="${orders.empty}" class="empty-state">
+        <div class="empty-state__icon">💼</div>
+        <p>Сейчас нет доступных заказов. Загляните позже.</p>
     </div>
-</div>
+
+    <div class="grid grid--cards" th:unless="${orders.empty}">
+        <div th:each="order : ${orders}" class="card card--hover">
+            <h3 class="card__title">Заказ #<span th:text="${order.id}">0</span></h3>
+            <div class="detail-row"><strong>Описание:</strong> <span th:text="${order.description}"></span></div>
+            <div class="detail-row"><strong>Бюджет:</strong> <span class="price" th:text="${order.budget} + ' ₽'"></span></div>
+            <div class="actions">
+                <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-primary btn-sm">Подробнее</a>
+            </div>
+        </div>
+    </div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

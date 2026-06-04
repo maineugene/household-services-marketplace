@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Профиль специалиста</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль специалиста — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<div style="max-width: 800px; margin: 20px auto; padding: 20px;">
-    <h1 th:text="${profile.user.firstName} + ' ' + ${profile.user.lastName}"></h1>
+<main class="page page--narrow">
+    <a href="/search" class="btn-back">← К поиску</a>
 
-    <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
-        <p><strong>Описание:</strong> <span th:text="${profile.description}"></span></p>
-        <p><strong>Опыт:</strong> <span th:text="${profile.experienceYears}"></span> лет</p>
-        <p><strong>Образование:</strong> <span th:text="${profile.education}"></span></p>
-        <p><strong>Категории:</strong> <span th:text="${profile.categories}"></span></p>
-        <p><strong>Рейтинг:</strong> ⭐ <span th:text="${profile.averageRating}"></span></p>
+    <div class="page-header">
+        <h1 th:text="${profile.user.firstName} + ' ' + ${profile.user.lastName}">Специалист</h1>
     </div>
-</div>
+
+    <div class="card">
+        <div class="stack">
+            <div class="detail-row"><strong>Описание:</strong> <span th:text="${profile.description}"></span></div>
+            <div class="detail-row"><strong>Опыт:</strong> <span th:text="${profile.experienceYears}"></span> лет</div>
+            <div class="detail-row"><strong>Образование:</strong> <span th:text="${profile.education}"></span></div>
+            <div class="detail-row"><strong>Категории:</strong> <span th:text="${profile.categories}"></span></div>
+            <div class="detail-row"><strong>Рейтинг:</strong> <span class="rating">⭐ <span th:text="${profile.averageRating}"></span></span></div>
+        </div>
+    </div>
+</main>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

@@ -5,19 +5,25 @@
 </head>
 <body>
 <header th:fragment="header">
-    <nav style="background: #333; color: white; padding: 15px;">
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: 20px;">
-                <a href="/" style="color: white; text-decoration: none;">Главная</a>
-                <a href="/search" style="color: white; text-decoration: none;">Поиск</a>
-                <a href="/orders/create" style="color: white; text-decoration: none;">Создать заказ</a>
-                <a href="/orders/my" style="color: white; text-decoration: none;">Мои заказы</a>
-                <a href="/bids/my" style="color: white; text-decoration: none;">Мои заявки</a>
-                <a href="/specialist/profile/view" style="color: white; text-decoration: none;">Профиль</a>
-            </div>
-            <div>
-                <form th:action="@{/logout}" method="post" style="display: inline;">
-                    <button type="submit" style="background: none; border: none; color: white; cursor: pointer;">Выйти</button>
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a href="/greet" class="navbar__brand">
+                <span class="navbar__logo">⚙</span>
+                <span>СпецПлатформа</span>
+            </a>
+
+            <ul class="navbar__links">
+                <li><a href="/greet">Главная</a></li>
+                <li><a href="/search">Поиск</a></li>
+                <li><a href="/orders/create">Создать заказ</a></li>
+                <li><a href="/orders/my">Мои заказы</a></li>
+                <li><a href="/bids/my">Мои заявки</a></li>
+                <li><a href="/specialist/profile/view">Профиль</a></li>
+            </ul>
+
+            <div class="navbar__right">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-secondary btn-sm">Выйти</button>
                 </form>
             </div>
         </div>

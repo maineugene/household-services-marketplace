@@ -1,70 +1,114 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа подбора специалистов</title>
+    <title>Личный кабинет — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 
-<!-- Container for aside and main -->
-<div class="container">
-    <!-- Aside Section (Navigation Bar) -->
-    <aside>
-        <nav>
-            <ul>
-                <li><a href="/">Главная</a></li>
+<!-- Authenticated navbar -->
+<div th:if="${isAuthenticated}" th:replace="fragments/header :: header"></div>
 
-                <!-- Ссылки для всех авторизованных пользователей -->
-                <th:block th:if="${isAuthenticated}">
-                    <li><a href="/search">Найти специалиста</a></li>
-                    <li><a href="/orders/create">Создать заказ</a></li>
-                    <li><a href="/orders/my">Мои заказы</a></li>
-                    <li><a href="/specialist/profile/view">Мой профиль</a></li>
-                </th:block>
+<!-- Public navbar (when not authenticated) -->
+<nav th:unless="${isAuthenticated}" class="navbar">
+    <div class="navbar__inner">
+        <a href="/" class="navbar__brand">
+            <span class="navbar__logo">⚙</span>
+            <span>СпецПлатформа</span>
+        </a>
+        <div class="navbar__right">
+            <a th:href="@{/login}" class="btn btn-ghost btn-sm">Войти</a>
+            <a th:href="@{/register}" class="btn btn-primary btn-sm">Регистрация</a>
+        </div>
+    </div>
+</nav>
 
-                <!-- Ссылки для специалиста -->
-                <th:block th:if="${userRole == 'SPECIALIST'}">
-                    <li><a href="/orders/available">Доступные заказы</a></li>
-                    <li><a href="/bids/my">Мои заявки</a></li>
-                    <li><a href="/orders/my-work">Мои задания</a></li>
-                </th:block>
+<main class="page">
 
-                <!-- Ссылки для модератора -->
-                <th:block th:if="${userRole == 'MODERATOR' or userRole == 'ADMIN'}">
-                    <li><a href="/moderation/dashboard">Модерация</a></li>
-                </th:block>
-
-                <!-- Ссылки для администратора -->
-                <th:block th:if="${userRole == 'ADMIN'}">
-                    <li><a href="/admin/dashboard">Админ-панель</a></li>
-                </th:block>
-            </ul>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main>
-        <th:block th:if="${!isAuthenticated}">
+    <!-- Not authenticated -->
+    <th:block th:if="${!isAuthenticated}">
+        <section class="hero">
             <h1>Добро пожаловать на платформу!</h1>
-            <p>Найдите лучших специалистов для любых задач</p>
-            <a th:href="@{/login}">Войти</a>
-            <a th:href="@{/register}">Зарегистрироваться</a>
-        </th:block>
+            <p>Найдите лучших специалистов для любых задач или начните зарабатывать как исполнитель.</p>
+            <div class="hero__actions">
+                <a th:href="@{/login}" class="btn btn-primary btn-lg">Войти</a>
+                <a th:href="@{/register}" class="btn btn-outline btn-lg">Зарегистрироваться</a>
+            </div>
+        </section>
+    </th:block>
 
-        <th:block th:if="${isAuthenticated}">
-            <h1>Здравствуйте, <span th:text="${user.firstName} + ' ' + ${user.lastName}"></span>!</h1>
-            <p th:text="${welcomeMessage}"></p>
-            <p>Ваша роль: <strong th:text="${userRole}"></strong></p>
-        </th:block>
-    </main>
-</div>
+    <!-- Authenticated dashboard -->
+    <th:block th:if="${isAuthenticated}">
+        <section class="welcome-banner">
+            <h1>Здравствуйте, <span th:text="${user.firstName} + ' ' + ${user.lastName}">Пользователь</span>!</h1>
+            <p th:text="${welcomeMessage}">Добро пожаловать!</p>
+            <span class="badge">Роль: <span th:text="${userRole}">USER</span></span>
+        </section>
 
-<!-- Footer -->
-<footer>
-    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Платформа подбора специалистов. Все права защищены.</p>
-</footer>
+        <h2 class="page-header">Быстрые действия</h2>
+        <div class="grid grid--cards">
+            <a href="/search" class="action-tile">
+                <span class="action-tile__icon">🔎</span>
+                <strong>Найти специалиста</strong>
+                <span>Поиск по категориям, цене и рейтингу</span>
+            </a>
+            <a href="/orders/create" class="action-tile">
+                <span class="action-tile__icon">📝</span>
+                <strong>Создать заказ</strong>
+                <span>Опишите задачу и получайте заявки</span>
+            </a>
+            <a href="/orders/my" class="action-tile">
+                <span class="action-tile__icon">📋</span>
+                <strong>Мои заказы</strong>
+                <span>Управляйте своими заказами</span>
+            </a>
+            <a href="/specialist/profile/view" class="action-tile">
+                <span class="action-tile__icon">👤</span>
+                <strong>Мой профиль</strong>
+                <span>Профиль специалиста и портфолио</span>
+            </a>
+
+            <th:block th:if="${userRole == 'SPECIALIST'}">
+                <a href="/orders/available" class="action-tile">
+                    <span class="action-tile__icon">💼</span>
+                    <strong>Доступные заказы</strong>
+                    <span>Найдите работу и откликнитесь</span>
+                </a>
+                <a href="/bids/my" class="action-tile">
+                    <span class="action-tile__icon">📨</span>
+                    <strong>Мои заявки</strong>
+                    <span>Статус ваших откликов</span>
+                </a>
+                <a href="/orders/my-work" class="action-tile">
+                    <span class="action-tile__icon">🛠️</span>
+                    <strong>Мои задания</strong>
+                    <span>Заказы, которые вы выполняете</span>
+                </a>
+            </th:block>
+
+            <th:block th:if="${userRole == 'MODERATOR' or userRole == 'ADMIN'}">
+                <a href="/moderation/dashboard" class="action-tile">
+                    <span class="action-tile__icon">🛡️</span>
+                    <strong>Модерация</strong>
+                    <span>Проверка профилей и отзывов</span>
+                </a>
+            </th:block>
+
+            <th:block th:if="${userRole == 'ADMIN'}">
+                <a href="/admin/dashboard" class="action-tile">
+                    <span class="action-tile__icon">📊</span>
+                    <strong>Админ-панель</strong>
+                    <span>Управление платформой</span>
+                </a>
+            </th:block>
+        </div>
+    </th:block>
+
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
 
 </body>
 </html>

@@ -1,68 +1,89 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Page</title>
-    <!-- Link to the external CSS file -->
+    <title>Регистрация — СпецПлатформа</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<div class="form-container">
-    <h1>Registration Form</h1>
-    <form th:action="@{/register}" method="post" th:object="${registrationForm}">
-        <!-- First Name -->
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" th:field="*{firstName}" required>
-        <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="error"></span>
-        <br>
 
-        <!-- Last Name -->
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" th:field="*{lastName}" required>
-        <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="error"></span>
-        <br>
+<nav class="navbar">
+    <div class="navbar__inner">
+        <a href="/" class="navbar__brand">
+            <span class="navbar__logo">⚙</span>
+            <span>СпецПлатформа</span>
+        </a>
+        <div class="navbar__right">
+            <a th:href="@{/login}" class="btn btn-outline btn-sm">Войти</a>
+        </div>
+    </div>
+</nav>
 
-        <!-- Country -->
-        <label for="country">Country:</label>
-        <select id="country" th:field="*{country}" required>
-            <option value="">Select your country</option>
-            <option value="usa">United States</option>
-            <option value="canada">Canada</option>
-            <option value="uk">United Kingdom</option>
-            <option value="australia">Australia</option>
-            <option value="india">India</option>
-            <option value="india">Belarus</option>
-            <option value="india">Ukraine</option>
-            <option value="india">Russia</option>
-        </select>
-        <span th:if="${#fields.hasErrors('country')}" th:errors="*{country}" class="error"></span>
-        <br>
+<main class="page--auth">
+    <div class="form-card form-card--wide">
+        <h1 class="text-center" style="margin-bottom:6px;">Создать аккаунт</h1>
+        <p class="text-center text-muted" style="margin-bottom:24px;">Присоединяйтесь к платформе за минуту</p>
 
-        <!-- Date of Birth -->
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" th:field="*{dob}" required>
-        <span th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}" class="error"></span>
-        <br>
+        <div th:if="${param.error}" class="alert alert-danger">
+            Не удалось зарегистрироваться. Возможно, пользователь с таким email уже существует.
+        </div>
 
-        <!-- Email -->
-        <label for="email">Email:</label>
-        <input type="email" id="email" th:field="*{email}" required>
-        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
-        <br>
+        <form th:action="@{/register}" method="post" th:object="${registrationForm}">
+            <div class="form-group">
+                <label for="firstName">Имя</label>
+                <input type="text" id="firstName" th:field="*{firstName}" placeholder="Иван" required>
+                <span class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+            </div>
 
-        <!-- Password -->
-        <label for="password">Password:</label>
-        <input type="password" id="password" th:field="*{password}" required>
-        <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
-        <br>
+            <div class="form-group">
+                <label for="lastName">Фамилия</label>
+                <input type="text" id="lastName" th:field="*{lastName}" placeholder="Иванов" required>
+                <span class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+            </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Register</button>
-    </form>
+            <div class="form-group">
+                <label for="country">Страна</label>
+                <select id="country" th:field="*{country}" required>
+                    <option value="">Выберите страну</option>
+                    <option value="russia">Россия</option>
+                    <option value="belarus">Беларусь</option>
+                    <option value="ukraine">Украина</option>
+                    <option value="usa">США</option>
+                    <option value="canada">Канада</option>
+                    <option value="uk">Великобритания</option>
+                    <option value="australia">Австралия</option>
+                    <option value="india">Индия</option>
+                </select>
+                <span class="error" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></span>
+            </div>
 
-    <!-- Link back to the home page -->
-    <a th:href="@{/}">Back to Home</a>
-</div>
+            <div class="form-group">
+                <label for="dob">Дата рождения</label>
+                <input type="date" id="dob" th:field="*{dob}" required>
+                <span class="error" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="you@example.com" required>
+                <span class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" th:field="*{password}" placeholder="••••••••" required>
+                <span class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Зарегистрироваться</button>
+        </form>
+
+        <p class="text-center text-muted" style="margin-top:18px;">
+            Уже есть аккаунт? <a th:href="@{/login}">Войти</a>
+        </p>
+    </div>
+</main>
+
 </body>
 </html>

@@ -1,38 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Java Academy</title>
+    <title>СпецПлатформа — подбор специалистов</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<!-- Container for aside and main -->
-<div class="container">
-    <!-- Aside Section (Navigation Bar) -->
-    <aside>
-        <nav>
-            <ul>
-                <li><a href="#">Главная</a></li>
-                <li><a href="#">О нас</a></li>
-                <li><a href="#">Сервисы</a></li>
-                <li><a href="#">Контакты</a></li>
-            </ul>
-        </nav>
-    </aside>
 
-    <!-- Main Content -->
-    <main>
-        <h1>Добро пожаловать на платформу подбора специалистов</h1>
-        <p>Для получения полного доступа к услугам необходима авторизация, ниже ссылка на форму входа</p>
-        <p th:text="${message}">Let's get started</p>
-        <a th:href="@{/login}">Login Page</a>
-    </main>
-</div>
+<nav class="navbar">
+    <div class="navbar__inner">
+        <a href="/" class="navbar__brand">
+            <span class="navbar__logo">⚙</span>
+            <span>СпецПлатформа</span>
+        </a>
+        <div class="navbar__right">
+            <a th:href="@{/login}" class="btn btn-ghost btn-sm">Войти</a>
+            <a th:href="@{/register}" class="btn btn-primary btn-sm">Регистрация</a>
+        </div>
+    </div>
+</nav>
 
-<!-- Footer -->
-<footer>
-    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Платформа подбора специалистов. Все права защищены.</p>
+<main class="page">
+    <section class="hero">
+        <h1>Найдите проверенного специалиста для любой задачи</h1>
+        <p>Размещайте заказы, получайте заявки от мастеров, сравнивайте цены и рейтинги —
+            всё в одном месте. Быстро, удобно и безопасно.</p>
+        <div class="hero__actions">
+            <a th:href="@{/register}" class="btn btn-primary btn-lg">Начать бесплатно</a>
+            <a th:href="@{/login}" class="btn btn-outline btn-lg">У меня уже есть аккаунт</a>
+        </div>
+    </section>
+
+    <p th:if="${message}" th:text="${message}" class="alert alert-info" style="margin-top:24px;"></p>
+
+    <section class="features">
+        <div class="grid grid--3">
+            <div class="feature">
+                <div class="feature__icon">🔎</div>
+                <h3>Поиск специалистов</h3>
+                <p>Фильтруйте по категории, городу и цене, сортируйте по рейтингу и находите лучших исполнителей.</p>
+            </div>
+            <div class="feature">
+                <div class="feature__icon">📝</div>
+                <h3>Заказы и заявки</h3>
+                <p>Опишите задачу, получайте предложения от специалистов и выбирайте подходящего исполнителя.</p>
+            </div>
+            <div class="feature">
+                <div class="feature__icon">⭐</div>
+                <h3>Рейтинги и отзывы</h3>
+                <p>Принимайте решения на основе реальных оценок и проверенных профилей мастеров.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span>
+        СпецПлатформа — подбор специалистов для любых задач. Все права защищены.</p>
 </footer>
+
 </body>
 </html>
